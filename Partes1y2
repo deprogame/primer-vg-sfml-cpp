@@ -79,7 +79,6 @@ int main()
 
         ventana.draw(circulo);
         ventana.draw(rectangulo);
-
         ventana.display(); //Mostramos el Contenido de la Ventana
     }
     
