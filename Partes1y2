@@ -1,0 +1,86 @@
+#include <SFML/Graphics.hpp>
+
+int main()
+
+{
+
+    int x_min = 0 ,x_max = 800;
+    int y_min = 0 ,y_max = 600;
+
+    sf::RenderWindow ventana(sf::VideoMode(x_max,y_max),"Un VG en 30 Min");
+
+    //Circulo-Pelota
+    int xc = 0, yc = 0 , rc=10;
+    int incre_xc = 1, incre_yc = 1; //incremento de variables
+    sf::CircleShape circulo(rc); // (rc= radiodel circulo)
+
+    // Rectángulo-Barra
+    int lr = 100, ar = 20;
+    int incre_xr = 10, incre_yr = 10;
+    int xr = (x_max-lr)/2 , yr = y_max - ar;
+    sf::RectangleShape rectangulo(sf::Vector2f(lr, ar));
+
+    // cuadrados-ladrillos
+    int const n = 20;// Cantidad de cuadrados
+    int ls = (4 * x_max) / (5 * n);// ecuación calcula el ancho de cuadrado para una separación = ls/4
+    int xs = 0 , ys = 0; //posición inicial de los cuadrados
+    sf::RectangleShape cuadrados[n]={};// array de cuadrados
+
+    for (int i = 0; i < n; ++i)//creamos n cuadrados y lo guardamos en un array
+    {
+        cuadrados[i] =  sf::RectangleShape (sf::Vector2f(ls, ls)); //creamos n cuadrados y lo guardamos en un array
+    }
+
+    while (ventana.isOpen())
+    {
+        sf::Event event;
+        while (ventana.pollEvent(event))
+        {
+            if(event.type == sf::Event::Closed)
+                ventana.close();
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
+                xr += incre_xr;
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
+                xr -= incre_xr;
+        }
+
+        ventana.clear(); //Limpiamos La Ventana
+        
+        //Aquí cambiamos la posición de los objetos
+
+        if (xc > x_max-rc*2 || xc < x_min)
+            incre_xc = -incre_xc;
+        if (yc > y_max-rc*2) 
+            xc = yc = 0;
+        if (yc < y_min)
+            incre_yc = -incre_yc;
+
+        xc += incre_xc; // equivale a xc = xc + incre_xc
+        yc += incre_yc;
+
+        circulo.setPosition(xc,yc);
+        rectangulo.setPosition(xr,yr);
+
+        //Cajas de colisión
+        sf::FloatRect circuloBox    = circulo.getGlobalBounds();
+        sf::FloatRect rectanguloBox = rectangulo.getGlobalBounds();
+
+        //detectando la colisión del circulo con el rectángulo
+        if (circuloBox.intersects(rectanguloBox)){
+            incre_yc = -incre_yc;
+        }
+
+        //Aquí dibujamos
+        for(int i = 0; i < n; ++i){
+            xs = i * (ls + ls/4 );
+            cuadrados[i].setPosition(xs,ys);
+            ventana.draw(cuadrados[i]);
+        }
+
+        ventana.draw(circulo);
+        ventana.draw(rectangulo);
+
+        ventana.display(); //Mostramos el Contenido de la Ventana
+    }
+    
+}
