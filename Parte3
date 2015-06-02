@@ -1,0 +1,92 @@
+#include <SFML/Graphics.hpp>
+#include <iostream>
+
+int main()
+{
+    int x_min = 0 ,x_max = 800;
+    int y_min = 0 ,y_max = 600;
+    sf::RenderWindow ventana(sf::VideoMode(x_max,y_max),"Parte III Intelligencia Virtual");
+
+    //Circulo
+    int xc = 50, yc = 50 , rc=10;
+    int incre_xc = 1, incre_yc = 1; //incremeto de variables
+    sf::CircleShape circulo(rc); // (rc= radiodel circulo)
+
+    // Rectangulo
+    int lr = 100, ar = 20;
+    int incre_xr = 10, incre_yr = 10;
+    int xr = (x_max-lr)/2 , yr = y_max - ar;
+    sf::RectangleShape rectangulo(sf::Vector2f(lr, ar));
+
+    // cuadrados
+    int const n = 20;// Cantidad de cuadrados
+    int ls = (4 * x_max) / (5 * n);// ecuacion calcula el ancho de cuadrado para una separacion = ls/4
+    int xs = 0 , ys = 0; //posicion inicial de los cuadrados
+    sf::RectangleShape cuadrados[n];// array de cuadrados
+    sf::FloatRect cuadradosBox[n];// array de caja de colisiones
+    for (int i = 0; i < n; ++i){//creamos n cuadrados y lo guardamos en un array
+        cuadrados[i]    = sf::RectangleShape (sf::Vector2f(ls, ls)); //creamos n cuadrados y lo guardamos en un array
+    }
+
+    while (ventana.isOpen())
+    {
+        sf::Event event;
+
+        while (ventana.pollEvent(event))
+        {
+            if(event.type == sf::Event::Closed)
+                ventana.close();
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
+                xr += incre_xr;
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
+                xr -= incre_xr;
+        }
+        ventana.clear(); //Limpiamos La Ventana
+
+        //Aqui cambiamos la posicion de los objetos
+        if (xc > x_max-rc*2 || xc < x_min)
+            incre_xc = -incre_xc;
+
+        if (yc > y_max-rc*2) // cambio en paso 8
+            xc = yc = 50;
+
+        if (yc < y_min)
+            incre_yc = -incre_yc;
+
+        xc += incre_xc; // equivale a xc = xc + incre_xc
+        yc += incre_yc;
+
+        circulo.setPosition(xc,yc);
+        rectangulo.setPosition(xr,yr);
+
+        //Cajas de colision
+        sf::FloatRect circuloBox    = circulo.getGlobalBounds();
+        sf::FloatRect rectanguloBox = rectangulo.getGlobalBounds();
+
+        //detectando la colision del circulocon el rectangulo
+        if (circuloBox.intersects(rectanguloBox)){
+            incre_yc = -incre_yc;
+        }
+
+        //colision del circulo con cada cuadrado
+        for (int i = 0; i < n; ++i){
+
+            if (circuloBox.intersects(cuadradosBox[i])){
+                incre_yc = -incre_yc;
+            }
+        }
+
+        //Aqui dibujamos
+        for(int i = 0; i < n; ++i){
+            xs = i * (ls + ls/4 );
+            cuadrados[i].setPosition(xs,ys);
+            cuadradosBox[i] = cuadrados[i].getGlobalBounds();
+            ventana.draw(cuadrados[i]);
+        }
+
+        ventana.draw(circulo);
+        ventana.draw(rectangulo);
+
+        ventana.display(); //Mostramos el Contenido de la Ventana
+    }
+}
